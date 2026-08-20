@@ -24,13 +24,20 @@ To krok 1 z 4 w typowym przebiegu porządkowania pobranej muzyki:
 
 ## Sposób użycia
 
-Program przetwarza pliki `.mp3` w **bieżącym katalogu terminala** (nie w katalogu, w
-którym leży plik exe — to jedyny program w pipeline, który działa w ten sposób). Przy
-zwykłym uruchomieniu dwuklikiem z folderu kolekcji to bez znaczenia, bo oba katalogi się
-pokrywają.
+Program jest jednym plikiem `MusicRenamer.py`. Skopiuj go do folderu z kolekcją i kliknij
+dwukrotnie — Windows uruchomi go zarejestrowanym `py.exe`. Nie ma żadnego kroku budowania
+i nie trzeba nic instalować poza Pythonem (3.9+).
+
+Program przetwarza pliki `.mp3` w **bieżącym katalogu** (`os.getcwd()`), a nie w katalogu,
+w którym leży plik `.py` — to jedyny program w pipeline, który działa w ten sposób. Przy
+zwykłym dwukliku z folderu kolekcji to bez znaczenia, bo Windows ustawia katalog bieżący na
+folder klikniętego pliku, więc oba katalogi się pokrywają. Różnica ma znaczenie tylko przy
+uruchomieniu ze skrótu z innym „Start in” albo z terminala `cd`-niętego gdzie indziej.
 
 Program działa rekurencyjnie po wszystkich podfolderach, zmienia tylko nazwy plików
-`.mp3` — nie rusza folderów ani innych typów plików.
+`.mp3` — nie rusza folderów ani innych typów plików. Kończy się bez pauzy (okno konsoli
+zamyka się od razu po przetworzeniu) — to narzędzie w pełni automatyczne, nie wymaga
+oglądania wyniku na ekranie.
 
 ## Rozpoznawane formaty nazw
 
@@ -46,25 +53,24 @@ Program rozpoznaje na początku nazwy pliku jeden z poniższych wzorców i zamie
 oraz te same warianty z jedną cyfrą zamiast dwóch (`N foo`, `N. foo`, `N-foo`, `N- foo`,
 `N.foo`) — w takim wypadku numer jest dodatkowo zerowany z przodu (`1` -> `01`).
 
-Jeśli nazwa pliku nie pasuje do żadnego z powyższych wzorców, plik zostaje bez zmian.
+Jeśli nazwa pliku nie pasuje do żadnego z powyższych wzorców (np. jest już w formacie
+`NN - Tytuł`), prefiks zostaje bez zmian.
+
+Niezależnie od prefiksu, rozszerzenie jest zawsze wymuszane na małe litery: `.MP3` → `.mp3`.
 
 ## Błędy i kolizje
 
 Jeśli plik o docelowej nazwie już istnieje (i nie jest to zmiana różniąca się tylko
-wielkością liter), operacja jest po cichu pomijana - plik nie jest nadpisywany.
+wielkością liter), operacja jest po cichu pomijana - plik nie jest nadpisywany, nic nie
+trafia do logu błędów.
 
-Zmiany nazw różniące się tylko wielkością liter są obsługiwane przez plik tymczasowy,
-żeby Windows prawidłowo utrwalił zmianę, z automatycznym rollbackiem do oryginalnej nazwy
-przy niepowodzeniu.
+Zmiany nazw różniące się tylko wielkością liter (typowo: sama zmiana rozszerzenia
+`.MP3` → `.mp3`) są obsługiwane przez plik tymczasowy, żeby Windows prawidłowo utrwalił
+zmianę, z automatycznym rollbackiem do oryginalnej nazwy przy niepowodzeniu.
 
-Nieudane operacje (po wyczerpaniu prób) trafiają na listę i po zakończeniu pracy program
-zapisuje je do pliku `RenameFailures.txt` w katalogu bieżącym. Plik powstaje tylko, gdy
-wystąpił choć jeden błąd.
-
-## Build
-
-Projekt jest aplikacją konsolową dla **.NET Framework 4.7.2** (starszy, nie-SDK-style
-`.csproj`) - buduje się przez Visual Studio albo `msbuild`, nie przez `dotnet build`.
+Nieudane operacje (po wyczerpaniu 5 prób z narastającym opóźnieniem) trafiają na listę i po
+zakończeniu pracy program zapisuje je do pliku `RenameFailures.txt` w katalogu bieżącym.
+Plik powstaje tylko, gdy wystąpił choć jeden błąd.
 
 ## Dokumentacja a specyfikacja agenta
 
